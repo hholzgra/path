@@ -1,0 +1,160 @@
+.TH PATH 1 \" -*- nroff -*-
+.SH NAME
+path \- manipulate PATH-like environment variables
+.SH SYNOPSIS
+.B path [-var name] [option path ...] ...
+.SH DESCRIPTION
+The
+.B path
+program is used to manipulate a colon-separated list of paths
+contained in an environment variable such as PATH.
+New paths can be added either to the beginning or the end of the path list,
+paths can be removed from the path list, and several checks can be made
+on the paths contained in the path list.
+All duplicate paths in the list are removed.
+.PP
+The normal output of the
+.B path
+program is a colon-separated path list based on the PATH environment variable
+and modified according to the arguments on the command line.
+To install the new path list into the PATH environment variable,
+you must use the shell's feature to capture and use program output.
+Here is the method to set the modified PATH value:
+.sp
+.nf
+PATH=`path [options]`
+.fi
+.sp
+The back-quotes run the path program and capture its output,
+and that output is then used to set the new value of PATH.
+.PP
+The -var option can be used to specify a different environment variable
+to manipulate instead of of the default one of PATH.
+This allows the easy manipulation of other colon-separated path list
+variables such as LD_LIBRARY_PATH or CLASSPATH.
+If the -var option is used more than once then only the last environment
+variable specified is manipulated.
+Specifying an environment variable which is undefined is treated the
+same as a variable which is defined but which has an empty path list.
+.PP
+Most options specified for
+.B path
+specify an action which affects all of the paths which follow the option,
+until the next such option which accepts paths as arguments.
+Some options (-var, -dd, -ci, -ri, -cr, -rr, -l, -ls, and -af) do not
+use path arguments and do not change the previously specified action.
+As options and paths are acted upon in the order specified by the command line,
+the path list is modified to make a new path list.
+When all of the command line arguments have been processed,
+the final path list is usually printed as the output of the program.
+.PP
+The -a option adds the following paths after the last path in the path list,
+if those paths are not already present in the list.
+If a path is already in the path list, then it is not moved.
+This option is the default option, so that if paths are specified for
+.B path
+with no preceeding options, then they will default to using this action.
+.PP
+The -b option adds the following paths before the first path in the path list,
+if those paths are not already present in the list.
+If a path is already in the path list, then it is not moved.
+.PP
+The -r option removes the following paths from the path list,
+if those paths are present.
+Nothing is done if a path is not in the path list.
+.PP
+The -ra and -rb options act like a combination -r and -a or -b option.
+They first remove the paths if they exist in the path list,
+and then add them back in to the beginning or end of the path list.
+These are used to put paths at the beginning or end of the path list
+without caring if they were already there.
+.PP
+The -ma and -mb options conditionally move the following paths to the
+front or the end of the path list.
+If the path is not in the path list, then it is NOT added.
+If the path is in the path list,
+then it is moved to the front or back of the path list as indicated.
+This is useful, for example,
+to reposition DOT to the front or end of the path list,
+without adding it in if it wasn't already there.
+.PP
+The -s option simply sets the path list to the following list of paths.
+This is the same as removing all of the paths in the path list,
+and then adding in the specified paths to make a new path list.
+.PP
+The -ci option checks the absolute paths in the final path list for validity,
+and reports to standard error those paths which are not valid.
+Valid paths must exist and normally must also be directories.
+However, if the -af option is used then the paths can also be normal files.
+Relative paths in the final path list are not checked.
+If this option is used, then the final path list is NOT printed,
+and the exit status will be 2 if any of the absolute paths are invalid.
+.PP
+The -ri option checks the absolute paths in the final path list for validity,
+and silently removes the invalid absolute paths from the path list.
+.PP
+The -cr option checks the final path list to see if it contains any
+relative paths (those not beginning with a slash),
+and reports any relative paths in the path list to standard error.
+If this option is used, then the final path list is NOT printed,
+and the exit status will be 2 if any relative paths were found.
+.PP
+The -rr option checks the paths in the final path list for relative paths,
+and silently removes all relative paths from the path list.
+.PP
+The -tp option tests for the presence of the following paths in the path list.
+If this option is used, then the final path list is NOT printed,
+and the exit status will be 2 if any of the following paths are not
+present in the path list.
+This is useful within shell scripts to test whether required paths are
+contained within the path list.
+.PP
+The -l and -ls options modify the output format so that the paths
+in the final path list are displayed one path per line without any colons.
+This is useful when you want to visually examine the list of paths,
+or when you want to use the list of paths in a shell command.
+For -l, the order of output is as determined by the final path list.
+For -ls, the output is in sorted order.
+.PP
+The -h option if used all by itself displays the usage of the program
+without doing anything else.
+.PP
+Typing
+.B path
+with no arguments is useful just to clean up the PATH environment variable,
+since it will remove all duplicated paths without doing anything else.
+.SH SPECIAL DOT HANDLING
+The DOT path ("." for the current directory) is normally treated
+specially by the
+.B path
+program.
+This special treatment exists because many people only want the DOT
+path to be used at the front or the back of the path list,
+and want to use the DOT path even if other relative paths are not used.
+.PP
+Firstly,
+.B path
+detects whether DOT was the first or last path in the original path list.
+If so,
+then after the path list has been modified by the command line arguments,
+if the DOT path is in the middle of the final path list then it is moved
+back to its original position in the list.
+.PP
+Secondly, the -cr and -rr options which check for and remove relative
+paths in the the path list do not complain about or remove the DOT path.
+.PP
+If special treatment of the DOT path is not desired,
+then using the -dd option disables the special treatment,
+making DOT act just like any other path.
+.SH EXIT STATUS
+On normal execution the exit status is 0.
+If a fatal error occured, the exit status is 1.
+If the -ci or -cr options were used and found an invalid path,
+or if the -tp option was used and a path was not present in the path list,
+the exit status is 2.
+.SH AUTHOR
+.nf
+David I. Bell
+dbell@canb.auug.org.au
+10 July 2000
+.fi
